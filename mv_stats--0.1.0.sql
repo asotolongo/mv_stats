@@ -1,4 +1,5 @@
-CREATE  TABLE _mv_stats ( mv_name text ,create_mv timestamp, mod_mv timestamp, refresh_mv_last timestamp , refresh_count int default 0,refresh_mv_time_last interval, refresh_mv_time_total interval default '00:00:00');
+CREATE  TABLE _mv_stats ( mv_name text ,create_mv timestamp, mod_mv timestamp, refresh_mv_last timestamp , refresh_count int default 0,
+refresh_mv_time_last interval, refresh_mv_time_total interval default '00:00:00', refresh_mv_time_min interval, refresh_mv_time_max interval, reset_last timestamp);
 CREATE  VIEW  mv_stats as select * from _mv_stats;
 
 
@@ -30,7 +31,15 @@ BEGIN
       IF tg_tag = 'REFRESH MATERIALIZED VIEW' THEN 
        t_refresh_total:=clock_timestamp()-(select current_setting ('mv_stats.start')::timestamp);
        SET _mv_stats.start to default;
-       UPDATE  _mv_stats SET refresh_mv_last=now(),refresh_count=refresh_count+1,refresh_mv_time_last=t_refresh_total, refresh_mv_time_total=refresh_mv_time_total+t_refresh_total
+       UPDATE  _mv_stats SET refresh_mv_last=now(),refresh_count=refresh_count+1,refresh_mv_time_last=t_refresh_total, refresh_mv_time_total=refresh_mv_time_total+t_refresh_total,
+        refresh_mv_time_min = (CASE WHEN refresh_mv_time_min IS NULL THEN t_refresh_total
+                                    WHEN refresh_mv_time_min IS NOT NULL AND refresh_mv_time_min > t_refresh_total THEN t_refresh_total
+                                    ELSE  refresh_mv_time_min
+                                    END),
+        refresh_mv_time_max = (CASE WHEN refresh_mv_time_max IS NULL THEN t_refresh_total
+                                    WHEN refresh_mv_time_max IS NOT NULL AND refresh_mv_time_max < t_refresh_total THEN t_refresh_total
+                                    ELSE  refresh_mv_time_max
+                                    END)                           
         WHERE mv_name= r.object_identity;
       END if;
      
@@ -97,12 +106,29 @@ CREATE OR REPLACE FUNCTION mv_activity_reset_stats (mview text default '*') retu
 $$
  BEGIN 
   IF $1 = '*' THEN 
-   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00' RETURNING mv_name;
+   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() RETURNING mv_name;
   ELSE 
-   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00' where mv_name=$1 RETURNING mv_name;
+   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() where mv_name=$1 RETURNING mv_name;
   END IF;
   RETURN ; 
  END; 
 
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION _mv_drop_objects () returns void AS
+$$
+
+  DROP FUNCTION mv_activity_reset_stats;
+  DROP FUNCTION mv_activity_init;
+  DROP EVENT TRIGGER trg_mv_info_start;
+  DROP FUNCTION fn_trg_mv_start;
+  DROP EVENT TRIGGER  trg_mv_info_drop;
+  DROP EVENT TRIGGER  trg_mv_info;
+  DROP FUNCTION fn_trg_mv_drop;
+  DROP FUNCTION fn_trg_mv;
+  DROP VIEW mv_stats;
+  DROP TABLE _mv_stats;
+  DROP FUNCTION _mv_drop_objects;
+ 
+$$ LANGUAGE sql;
 

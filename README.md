@@ -11,17 +11,20 @@ To access and manipulate these statistics, the module provides a view named `mv_
 
 
 The statistics gathered by the module are made available via a view named mv_stats. 
-This view contains one row for each distinct materialized view in  database,  The columns of the view are shown in following Table.
+This view contains one row for each distinct materialized view in  database, the columns of the view are shown in following Table.
 
-| Colunm                |      Type     |  Description |
+| Column                |      Type     |  Description |
 |-----------------------|---------------|--------------|
 | mv_name               |  text         |  Name of MV schema-qualified|
 | create_mv             |  timestamp    |  Timestamp of MV creation (`CREATE MATERIALIZED VIEW`), `NULL` means that MV existed before the extension and was loaded using the function `mv_activity_init` |
 | mod_mv                |  timestamp    |  Timestamp of MV Modification (`ALTER MATERIALIZED VIEW`)  |
 | refresh_mv_last       |  timestamp    |  Timestamp of last time that MV was refreshed (`REFRESH MATERIALIZED VIEW`)|
-| refresh_count         |  int          |   Number of times refreshed |
-| refresh_mv_time_last  |  interval     |   Refresh time of last time |
-| refresh_mv_time_total |  interval     |   Total refresh time  |
+| refresh_count         |  int          |  Number of times refreshed |
+| refresh_mv_time_last  |  interval     |  Refresh time of last time |
+| refresh_mv_time_total |  interval     |  Total refresh time  |
+| refresh_mv_time_min   |  interval     |  Min refresh time  |
+| refresh_mv_time_max   |  interval     |  Max refresh time  |
+| reset_last            |  timestamp    |  Timestamp of last  stats reset  |
 
 
 
@@ -65,17 +68,17 @@ Can check the statistics collected by the extension quering the view `mv_stats`:
 ```
 test=# CREATE MATERIALIZED VIEW mv_example AS SELECT * FROM pg_stat_activity ;
 test=# REFRESH MATERIALIZED VIEW mv_example ;
-test=# SELECT * FROM mv_stats ;
-      mv_name      |         create_mv          | mod_mv |      refresh_mv_last       | refresh_count | refresh_mv_time_last | refresh_mv_time_total 
--------------------+----------------------------+--------+----------------------------+---------------+----------------------+-----------------------
- public.mv_example | 2021-01-31 13:20:21.293996 |        | 2021-01-31 13:21:33.490651 |             1 | 00:00:00.689449      | 00:00:00.689449
+test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_count, refresh_mv_time_last as refresh_time_last , refresh_mv_time_total as refresh_time_total, refresh_mv_time_min as refresh_time_min,refresh_mv_time_max  as refresh_time_max, reset_last FROM mv_stats ;
+      mv_name      |         create_mv          | mod_mv |       refresh_last        | refresh_count | refresh_time_last | refresh_time_total | refresh_time_min | refresh_time_max | reset_last 
+-------------------+----------------------------+--------+---------------------------+---------------+-------------------+--------------------+------------------+------------------+-------
+ public.mv_example | 2021-02-03 15:32:35.826251 |        | 2021-02-03 15:32:45.37572 |             1 | 00:00:00.45811    | 00:00:00.45811     | 00:00:00.45811   | 00:00:00.45811   | 
 (1 row)
 
 
 
 ```
 
-If have MVs previous of create the extension, these MVs can be adde to extension using the function `mv_activity_init`
+If have MVs previous of create the extension, these MVs can be added to extension's stats using the function `mv_activity_init`
 ```
 test=# SELECT * FROM mv_activity_init();
  mv_activity_init 
@@ -83,17 +86,17 @@ test=# SELECT * FROM mv_activity_init();
  public.mv1
 (1 row)
 
-test=# SELECT * FROM mv_stats ;
-      mv_name      |         create_mv          | mod_mv |      refresh_mv_last       | refresh_count | refresh_mv_time_last | refresh_mv_time_total 
--------------------+----------------------------+--------+----------------------------+---------------+----------------------+-----------------------
- public.mv_example | 2021-01-31 13:20:21.293996 |        | 2021-01-31 13:21:33.490651 |             1 | 00:00:00.689449      | 00:00:00.689449
- public.mv1        |                            |        |                            |             0 |                      | 00:00:00
-(2 rows)
+test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_count, refresh_mv_time_last as refresh_time_last , refresh_mv_time_total as refresh_time_total, refresh_mv_time_min as refresh_time_min,refresh_mv_time_max  as refresh_time_max, reset_last FROM mv_stats ;
+      mv_name      |         create_mv          | mod_mv |       refresh_last        | refresh_count | refresh_time_last | refresh_time_total | refresh_time_min | refresh_time_max | reset_last 
+-------------------+----------------------------+--------+---------------------------+---------------+-------------------+--------------------+------------------+------------------+-------
+ public.mv_example | 2021-02-03 15:32:35.826251 |        | 2021-02-03 15:32:45.37572 |             1 | 00:00:00.45811    | 00:00:00.45811     | 00:00:00.45811   | 00:00:00.45811   | 
+ public.mv1        |                            |        |                           |             0 |                   | 00:00:00           |                  |                  | 
+
  
 
 ```
 
-To reset the statistic collected can use the function   `mv_activity_reset_stats`
+To reset the statistic collected you can use the function   `mv_activity_reset_stats`
 ```
 -- for specific MV
 test=# SELECT * FROM mv_activity_reset_stats ('public.mv_example');
@@ -103,12 +106,13 @@ test=# SELECT * FROM mv_activity_reset_stats ('public.mv_example');
 (1 row)
 
 
-test=# SELECT * FROM mv_stats ;
-      mv_name      |         create_mv          | mod_mv | refresh_mv_last | refresh_count | refresh_mv_time_last | refresh_mv_time_total 
--------------------+----------------------------+--------+-----------------+---------------+----------------------+-----------------------
- public.mv1        |                            |        |                 |             0 |                      | 00:00:00
- public.mv_example | 2021-01-31 13:20:21.293996 |        |                 |             0 |                      | 00:00:00
+test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_count, refresh_mv_time_last as refresh_time_last , refresh_mv_time_total as refresh_time_total, refresh_mv_time_min as refresh_time_min,refresh_mv_time_max  as refresh_time_max, reset_last FROM mv_stats ;
+      mv_name      |         create_mv          | mod_mv | refresh_last | refresh_count | refresh_time_last | refresh_time_total | refresh_time_min | refresh_time_max |         reset_last         
+-------------------+----------------------------+--------+--------------+---------------+-------------------+--------------------+------------------+------------------+-----------------
+ public.mv1        |                            |        |              |             0 |                   | 00:00:00           |                  |                  | 
+ public.mv_example | 2021-02-03 15:32:35.826251 |        |              |             0 |                   | 00:00:00           |                  |                  | 2021-02-03 15:38:37.540717
 (2 rows)
+
 
 -- for all views 
 test=# SELECT * FROM mv_activity_reset_stats ();
@@ -120,11 +124,14 @@ test=# SELECT * FROM mv_activity_reset_stats ();
 
 ```
 
+The "extension" can be used in a postgreSQL instalation whre you can not install extra extension (such us RDS, etc), just must load the scrip `mv_stats--0.1.0.sql` in your database and enjoy it, to remove the "extension" in this case you can use the function `select _mv_drop_objects();` 
+
 
 
 
 IMPORTANT: If you find some bugs in the existing version, please contact to me.
 
 Anthony R. Sotolongo León
+asotolongo@ongres.com
 asotolongo@gmail.com
 
