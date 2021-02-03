@@ -124,7 +124,7 @@ test=# SELECT * FROM mv_activity_reset_stats ();
 
 ```
 
-The "extension" can be used in a postgreSQL instalation whre you can not install extra extension (such us RDS, etc), just must load the scrip `mv_stats--0.1.0.sql` in your database and enjoy it, to remove the "extension" in this case you can use the function `select _mv_drop_objects();` 
+The "extension" can be used in a PostgreSQL instalation where you can not install extra extension (such us RDS, etc), just must load the script `mv_stats--0.1.0.sql` in your database and enjoy it, to remove the "extension" in this case you can use the function `select _mv_drop_objects();` 
 
 
 
