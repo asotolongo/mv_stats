@@ -40,7 +40,7 @@ make install
 
 If not install,  you must make sure you can see the binary pg_config,
 maybe setting PostgreSQL binary path in the OS  or setting PG_CONFIG = /path_to_pg_config/  in the makefile 
-or run:  `make install  PG_CONFIG = /path_to_pg_config/`
+or run:  `make install  PG_CONFIG=/path_to_pg_config/`
 
 In your database execute: 
 ```
@@ -53,9 +53,9 @@ CREATE EXTENSION mv_stats;
 
 --Functions:
 
-`mv_activity_init():` Add the views that was created previously to the extension and begin to track statistics( `create_mv` column is marked NULL)
+`mv_activity_init():` Add the views that was created previously to the extension and begin to track statistics( `create_mv` column is marked NULL), only for superuser
 
-`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using schema-qualified name
+`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using schema-qualified name, only for superuser
 
 
 Example of use:

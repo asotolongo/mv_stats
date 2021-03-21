@@ -47,7 +47,7 @@ BEGIN
 
 END;
 
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION fn_trg_mv_drop()  RETURNS event_trigger AS
 $$
@@ -65,7 +65,7 @@ BEGIN
  
 END;
 
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE EVENT TRIGGER trg_mv_info ON ddl_command_end 
 WHEN TAG IN ('CREATE MATERIALIZED VIEW', 'ALTER MATERIALIZED VIEW','REFRESH MATERIALIZED VIEW')
@@ -87,7 +87,7 @@ BEGIN
 
 END;
 
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE EVENT TRIGGER trg_mv_info_start  ON ddl_command_start
 WHEN TAG IN ('REFRESH MATERIALIZED VIEW')
@@ -100,7 +100,7 @@ $$
    SELECT schemaname||'.'||matviewname FROM pg_catalog.pg_matviews where schemaname||'.'||matviewname not in (select mv_name from _mv_stats)
    RETURNING mv_name;
  
-$$ LANGUAGE sql;
+$$ LANGUAGE sql ;
 
 CREATE OR REPLACE FUNCTION mv_activity_reset_stats (mview text default '*') returns setof text AS
 $$
@@ -113,7 +113,7 @@ $$
   RETURN ; 
  END; 
 
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql ;
 
 CREATE OR REPLACE FUNCTION _mv_drop_objects () returns void AS
 $$
@@ -131,4 +131,7 @@ $$
   DROP FUNCTION _mv_drop_objects;
  
 $$ LANGUAGE sql;
+
+GRANT SELECT ON _mv_stats to public;
+GRANT SELECT ON mv_stats to public;
 
