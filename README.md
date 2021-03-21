@@ -1,7 +1,7 @@
 mv_stats  extension
 ======================================
 
-The mv_stats extension a means for tracking some statistics of all materialized views in a database.
+The mv_stats extension is a means for tracking some statistics of all materialized views in a database.
 
 The extension  must be loaded using the the PostgreSQL's clause `CREATE EXTENSION` 
 
@@ -11,7 +11,7 @@ To access and manipulate these statistics, the module provides a view named `mv_
 
 
 The statistics gathered by the module are made available via a view named mv_stats. 
-This view contains one row for each distinct materialized view in  database, the columns of the view are shown in following Table.
+This view contains one row for each distinct materialized view in the database, the columns of the view are shown in the following table.
 
 | Column                |      Type     |  Description |
 |-----------------------|---------------|--------------|
@@ -53,7 +53,7 @@ CREATE EXTENSION mv_stats;
 
 --Functions:
 
-`mv_activity_init():` Add the views that was created previously to the extension and begin to track statistics( `create_mv` column is marked NULL), only for superuser
+`mv_activity_init():` Add the views that were created previously to the extension and begin to track statistics( `create_mv` column is marked NULL), only for superuser
 
 `mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using schema-qualified name, only for superuser
 
@@ -78,7 +78,7 @@ test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_
 
 ```
 
-If have MVs previous of create the extension, these MVs can be added to extension's stats using the function `mv_activity_init`
+If have MVs previous of creating the extension, these MVs can be added to the extension's stats using the function `mv_activity_init`
 ```
 test=# SELECT * FROM mv_activity_init();
  mv_activity_init 
@@ -124,7 +124,7 @@ test=# SELECT * FROM mv_activity_reset_stats ();
 
 ```
 
-The "extension" can be used in a PostgreSQL instalation where you can not install extra extension (such us RDS, etc), just must load the script `mv_stats--0.1.0.sql` in your database and enjoy it, to remove the "extension" in this case you can use the function `select _mv_drop_objects();` 
+The "extension" can be used in a PostgreSQL installation where you can not install extra extension (such us RDS, etc), just must load the script `mv_stats--0.1.0.sql` in your database and enjoy it, to "remove the extension" in this case you can use the function `select _mv_drop_objects();` 
 
 
 
