@@ -135,3 +135,5 @@ $$ LANGUAGE sql;
 GRANT SELECT ON _mv_stats to public;
 GRANT SELECT ON mv_stats to public;
 
+select mv_activity_init ();
+

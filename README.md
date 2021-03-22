@@ -20,7 +20,7 @@ This view contains one row for each distinct materialized view in the database, 
 | mod_mv                |  timestamp    |  Timestamp of MV Modification (`ALTER MATERIALIZED VIEW`)  |
 | refresh_mv_last       |  timestamp    |  Timestamp of last time that MV was refreshed (`REFRESH MATERIALIZED VIEW`)|
 | refresh_count         |  int          |  Number of times refreshed |
-| refresh_mv_time_last  |  interval     |  Refresh time of last time |
+| refresh_mv_time_last  |  interval     |  Duration of last refresh time |
 | refresh_mv_time_total |  interval     |  Total refresh time  |
 | refresh_mv_time_min   |  interval     |  Min refresh time  |
 | refresh_mv_time_max   |  interval     |  Max refresh time  |
@@ -47,13 +47,23 @@ In your database execute:
 CREATE EXTENSION mv_stats;
 ```
 
+If you have some views created previously they will be automatically added to the stats on  blank, and after the refresh, stats will be fit
+
+```
+
+test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_count, refresh_mv_time_last as refresh_time_last , refresh_mv_time_total as refresh_time_total, refresh_mv_time_min as refresh_time_min,refresh_mv_time_max  as refresh_time_max, reset_last FROM mv_stats ;
+      mv_name      |         create_mv          | mod_mv |       refresh_last        | refresh_count | refresh_time_last | refresh_time_total | refresh_time_min | refresh_time_max | reset_last 
+-------------------+----------------------------+--------+---------------------------+---------------+-------------------+--------------------+------------------+------------------+-------
+ public.mv1        |                            |        |                           |             0 |                   | 00:00:00           |                  |                  | 
+
+ 
+
+```
 
 
 
+--Function:
 
---Functions:
-
-`mv_activity_init():` Add the views that were created previously to the extension and begin to track statistics( `create_mv` column is marked NULL), only for superuser
 
 `mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using schema-qualified name, only for superuser
 
@@ -78,23 +88,6 @@ test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_
 
 ```
 
-If have MVs previous of creating the extension, these MVs can be added to the extension's stats using the function `mv_activity_init`
-```
-test=# SELECT * FROM mv_activity_init();
- mv_activity_init 
-------------------
- public.mv1
-(1 row)
-
-test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_count, refresh_mv_time_last as refresh_time_last , refresh_mv_time_total as refresh_time_total, refresh_mv_time_min as refresh_time_min,refresh_mv_time_max  as refresh_time_max, reset_last FROM mv_stats ;
-      mv_name      |         create_mv          | mod_mv |       refresh_last        | refresh_count | refresh_time_last | refresh_time_total | refresh_time_min | refresh_time_max | reset_last 
--------------------+----------------------------+--------+---------------------------+---------------+-------------------+--------------------+------------------+------------------+-------
- public.mv_example | 2021-02-03 15:32:35.826251 |        | 2021-02-03 15:32:45.37572 |             1 | 00:00:00.45811    | 00:00:00.45811     | 00:00:00.45811   | 00:00:00.45811   | 
- public.mv1        |                            |        |                           |             0 |                   | 00:00:00           |                  |                  | 
-
- 
-
-```
 
 To reset the statistic collected you can use the function   `mv_activity_reset_stats`
 ```
@@ -124,14 +117,15 @@ test=# SELECT * FROM mv_activity_reset_stats ();
 
 ```
 
-The "extension" can be used in a PostgreSQL installation where you can not install extra extension (such us RDS, etc), just must load the script `mv_stats--0.1.0.sql` in your database and enjoy it, to "remove the extension" in this case you can use the function `select _mv_drop_objects();` 
-
+The "extension" can be used in a PostgreSQL installation where you can not install extra extension (such us RDS, etc), you just must load the script mv_stats--0.1.0.sql in your database and enjoy it, to “remove the extension" in this case you can use the function select _mv_drop_objects();
 
 
 
 IMPORTANT: If you find some bugs in the existing version, please contact to me.
 
 Anthony R. Sotolongo León
+
 asotolongo@ongres.com
+
 asotolongo@gmail.com
 
