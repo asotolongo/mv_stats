@@ -6,7 +6,7 @@ The mv_stats extension is a means for tracking some statistics of all materializ
 The extension  must be loaded using the the PostgreSQL's clause `CREATE EXTENSION` 
 
 When `mv_stat` is loaded, it begin to tracks statistics about  materialized views in this databases. 
-To access and manipulate these statistics, the module provides a view named `mv_stats`, and the utility functions `mv_activity_init` and `mv_activity_reset_stats`. 
+To access and manipulate these statistics, the module provides a view named `mv_stats`, and the utility function  and `mv_activity_reset_stats`. 
 
 
 
