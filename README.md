@@ -16,7 +16,7 @@ This view contains one row for each distinct materialized view in the database, 
 | Column                |      Type     |  Description |
 |-----------------------|---------------|--------------|
 | mv_name               |  text         |  Name of MV schema-qualified|
-| create_mv             |  timestamp    |  Timestamp of MV creation (`CREATE MATERIALIZED VIEW`), `NULL` means that MV existed before the extension and was loaded using the function `mv_activity_init` |
+| create_mv             |  timestamp    |  Timestamp of MV creation (`CREATE MATERIALIZED VIEW`), `NULL` means that MV existed before the extension and was loaded when creating the extension |
 | mod_mv                |  timestamp    |  Timestamp of MV Modification (`ALTER MATERIALIZED VIEW`)  |
 | refresh_mv_last       |  timestamp    |  Timestamp of last time that MV was refreshed (`REFRESH MATERIALIZED VIEW`)|
 | refresh_count         |  int          |  Number of times refreshed |
@@ -65,7 +65,7 @@ test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_
 --Function:
 
 
-`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using schema-qualified name, only for superuser
+`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using the schema-qualified name, only for superuser
 
 
 Example of use:
