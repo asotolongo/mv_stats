@@ -30,7 +30,7 @@ BEGIN
       END IF;
       IF tg_tag = 'REFRESH MATERIALIZED VIEW' THEN 
        t_refresh_total:=clock_timestamp()-(select current_setting ('mv_stats.start')::timestamp);
-       SET _mv_stats.start to default;
+       SET mv_stats.start to default;
        UPDATE  _mv_stats SET refresh_mv_last=now(),refresh_count=refresh_count+1,refresh_mv_time_last=t_refresh_total, refresh_mv_time_total=refresh_mv_time_total+t_refresh_total,
         refresh_mv_time_min = (CASE WHEN refresh_mv_time_min IS NULL THEN t_refresh_total
                                     WHEN refresh_mv_time_min IS NOT NULL AND refresh_mv_time_min > t_refresh_total THEN t_refresh_total
