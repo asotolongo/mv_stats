@@ -65,7 +65,7 @@ test=# SELECT mv_name,create_mv,mod_mv,refresh_mv_last as refresh_last, refresh_
 --Function:
 
 
-`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can be define a specific MV passing the name of this view using the schema-qualified name, only for superuser
+`mv_activity_reset_stats (mview):` Reset the statistics collected, `mview` default value is `*`, means all MV, but can define 1/many (comma separate)  MVs passing the name of these views using the schema-qualified name, Database superuser privileges
 
 
 Example of use:

@@ -102,14 +102,18 @@ $$
  
 $$ LANGUAGE sql ;
 
-CREATE OR REPLACE FUNCTION mv_activity_reset_stats (mview text default '*') returns setof text AS
+CREATE OR REPLACE FUNCTION mv_activity_reset_stats (mview variadic text[] DEFAULT array['*']) returns setof text AS
 $$
+DECLARE 
+v text;
  BEGIN 
-  IF $1 = '*' THEN 
-   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() RETURNING mv_name;
-  ELSE 
-   RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() where mv_name=$1 RETURNING mv_name;
-  END IF;
+  FOREACH v IN ARRAY $1 LOOP
+   IF v = '*' THEN 
+    RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() RETURNING mv_name;
+   ELSE 
+    RETURN query UPDATE _mv_stats SET refresh_mv_last= NULL , refresh_count= 0,refresh_mv_time_last= NULL, refresh_mv_time_total= '00:00:00', refresh_mv_time_min= NULL, refresh_mv_time_max= NULL, reset_last = now() where mv_name=v RETURNING mv_name;
+   END IF;
+  END LOOP;
   RETURN ; 
  END; 
 
