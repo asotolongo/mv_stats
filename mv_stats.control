@@ -1,4 +1,4 @@
 #extension
 comment = 'Extension to track statistics about materialized view in the database'
-default_version = '0.2.0'
+default_version = '0.3.0'
 superuser = true
