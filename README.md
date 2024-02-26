@@ -117,7 +117,22 @@ test=# SELECT * FROM mv_activity_reset_stats ();
 
 ```
 
-The "extension" can be used in a PostgreSQL installation where you can not install extra extension (such us RDS, etc), you just must load the script mv_stats--0.1.0.sql in your database and enjoy it, to “remove the extension" in this case you can use the function select _mv_drop_objects();
+The "extension" can be used in a PostgreSQL installation where you can not install extra extension (such us RDS, etc), you just must load the script mv_stats--0.2.0.sql in your database and enjoy it, to “remove the extension" in this case you can use the function select _mv_drop_objects();
+
+
+### UPDATE extension procedure 
+After installing the new version of the extension please execute the extension update command inside the database
+
+
+_Note: after Update the extension the data for the view mv_stats will be deleted, if you want to keep it, please make a copy from this view in another table before updating the extension:_
+
+```sql
+CREATE TABLE mv_stats_old_data AS SELECT * FROM  mv_stats;
+
+ALTER EXTENSION mv_stats UPDATE ;
+
+```
+
 
 
 
