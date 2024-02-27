@@ -134,6 +134,14 @@ ALTER EXTENSION mv_stats UPDATE ;
 ```
 
 
+### Regression Tests
+
+```
+make installcheck
+or
+make installcheck PG_CONFIG=/path_to_pg_config/
+```
+
 
 
 IMPORTANT: If you find some bugs in the existing version, please contact to me.

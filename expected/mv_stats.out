@@ -1,0 +1,34 @@
+\set ECHO none
+    mv_name    | refresh_count 
+---------------+---------------
+ public.mv_act |             1
+ public.mv_bgw |             1
+ public.mv_dat |             1
+(3 rows)
+
+ mv_activity_reset_stats 
+-------------------------
+ public.mv_act
+(1 row)
+
+    mv_name    | refresh_count 
+---------------+---------------
+ public.mv_bgw |             1
+ public.mv_dat |             1
+ public.mv_act |             0
+(3 rows)
+
+ mv_activity_reset_stats 
+-------------------------
+ public.mv_bgw
+ public.mv_dat
+ public.mv_act
+(3 rows)
+
+    mv_name    | refresh_count 
+---------------+---------------
+ public.mv_bgw |             0
+ public.mv_dat |             0
+ public.mv_act |             0
+(3 rows)
+
